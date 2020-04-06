@@ -4,17 +4,25 @@ import time
 
 version = "1.0"
 
-w = open("/home/pi/torPI/config.txt", "w+")
-w.close()
-g = open("/home/pi/torPI/config.txt", "r")
 
 
 
 
 def intro():
-    print("-=-=-=-=-= TorPI =-=-=-=-=-")
-    print("version: " + version)
-    print("developed by Mutiny27")
+    banner = """
+
+    ████████████████    ███████████    ███████          ████████   ███████████ 
+           █           █           █   █      █         █       █       █       
+           █           █           █   █     █          █       █       █       
+           █           █           █   ██████           ████████        █
+           █           █           █   █     █          █               █
+           █            ███████████    █      █         █          ███████████
+        
+    Developer: Mutiny27
+    Verion: 1.0.1
+    """
+
+    print(banner)
 def clear():
     os.system("clear")
 
@@ -90,6 +98,25 @@ intitializeTor()
 process = subprocess.Popen("service tor status".split(), stdout=subprocess.PIPE)
 output = process.communicate()[0]
 
+def restartTor():
+    if b'Active: inactive' in output:
+        cprint("[X] unable to restart tor (tor isn't running)", "red")
+        input("Press Enter to Continue...")
+    else:
+        cprint("[X] Restarting tor...", "red")
+        os.system("sudo service tor restart")
+        cprint("[+] Tor restarted", "green")
+        input("Press Enter to Continue...")
+
+def restartCommand():
+    if b'Active: inactive' in output:
+        cprint("[X] unable to restart tor (tor isn't running)", "red")
+        input("Press Enter to Continue...")
+    else:
+        cprint("[X] Restarting Tor...", "red")
+        os.system("sudo service tor restart")
+        cprint("[+] Tor restarted", "green")
+        cprint("[+] Verifying connection...", "blue")
 #print(output)
 if b'Active: active' in output:
     cprint("[+] tor started", "green")
@@ -100,6 +127,7 @@ if not b'Active: acitve' in output:
 startLoop = True
 
 while startLoop:
+    getTorIP()
     raw_ip = getTorIP()
     process = subprocess.Popen("service tor status".split(), stdout=subprocess.PIPE)
     output = process.communicate()[0]
@@ -146,14 +174,7 @@ while startLoop:
                     torStop = False
 
     if mainChoice == "2":
-        if b'Active: inactive' in output:
-            cprint("[X] unable to restart tor (tor isn't running)", "red")
-            input("Press Enter to Continue...")
-        else:
-            cprint("[X] Restarting tor...", "red")
-            os.system("sudo service tor restart")
-            cprint("[+] Tor restarted", "green")
-            input("Press Enter to Continue...")
+        restartTor()
 
     if mainChoice == "3":
         cmd_input = input("Please enter the command you wish to run: ")
@@ -161,9 +182,9 @@ while startLoop:
         input("Press Enter to Continue...")
         with open('/home/pi/torPI/config.txt') as f:
             if 'restartTerminal: y' in f.read():
-                print("test terminal")
-                os.system("sudo service tor restart")
+                #print("test terminal")
                 getTorIP()
+                restartCommand()
 
     if mainChoice == "99":
         cprint("[+] Starting tor...", "green")
